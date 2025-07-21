@@ -1,2 +1,3 @@
 # DAXTER
-work in progress, up to date with the latest updates
+Work in progress. Stay up to date with the latest updates!
+

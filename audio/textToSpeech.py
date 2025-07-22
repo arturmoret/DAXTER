@@ -1,24 +1,30 @@
+import threading
 import pyttsx3
-import time
 
 class GestorVoz:
-    def __init__(self, velocidad=150, espera_entre_mensajes=5):
-        self.motor = pyttsx3.init()
-        self.motor.setProperty('rate', velocidad)
-        self.ultima_vez_dicho = {}
-        self.espera = espera_entre_mensajes
+    def __init__(self, velocidad=150, id_voz=1):
+        self.velocidad = velocidad
+        self.id_voz = id_voz
+        self.lock = threading.Lock()     
 
-    def decir_si_corresponde(self, clases, nombres_clases):
-        ahora = time.time()
-        clases_a_decir = []
+    def _hablar(self, texto):
+        with self.lock:                  
+            engine = pyttsx3.init()
+            engine.setProperty('rate', self.velocidad)
 
-        for c in clases:
-            hace_cuanto = ahora - self.ultima_vez_dicho.get(c, 0)
-            if hace_cuanto > self.espera:
-                clases_a_decir.append(nombres_clases.get(c, f"clase {c}"))
-                self.ultima_vez_dicho[c] = ahora
+            voces = engine.getProperty('voices')
+            if self.id_voz < len(voces):
+                engine.setProperty('voice', voces[self.id_voz].id)
 
-        if clases_a_decir:
-            texto = "I saw " + " and ".join(clases_a_decir)
-            self.motor.say(texto)
-            self.motor.runAndWait()
+            engine.say(texto)
+            engine.runAndWait()          
+            engine.stop()                
+
+    def decir(self, clases, nombres_clases):
+        if not clases:
+            return
+
+        nombres_gen = (nombres_clases.get(c, f'class {c}') for c in clases)
+        texto = "I saw " + " and ".join(nombres_gen)
+        threading.Thread(target=self._hablar, args=(texto,), daemon=True).start()
+

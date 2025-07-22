@@ -2,24 +2,26 @@ import torch
 import cv2
 
 class DetectorYOLO:
+
     def __init__(self, clases_interes):
         self.modelo = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-        self.modelo.classes = clases_interes
+        self.modelo.conf = 0.45                  
+        self.modelo.classes = clases_interes      
         self.cap = cv2.VideoCapture(0)
 
         if not self.cap.isOpened():
-            raise RuntimeError("The camera couln't be opened")
+            raise RuntimeError("No se pudo abrir la cámara")
 
     def obtener_frame_y_clases(self):
-        ret, frame = self.cap.read()
-        if not ret:
+        ok, frame = self.cap.read()
+        if not ok:
             return None, set()
 
-        resultados = self.modelo(frame)
-        resultados.render()
-        clases_detectadas = set(int(x[5]) for x in resultados.xyxy[0])
-
-        return frame, clases_detectadas
+        res = self.modelo(frame, size=640)
+        
+        img_bgr = res.render()[0]
+        clases_detectadas = {int(x[-1]) for x in res.xyxy[0]}  
+        return img_bgr, clases_detectadas
 
     def mostrar_frame(self, frame, ventana='Detection'):
         cv2.imshow(ventana, frame)

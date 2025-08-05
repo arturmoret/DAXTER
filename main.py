@@ -17,7 +17,7 @@ from ai.llm import (
 # Configuración
 # --------------------------------------------------------------------------
 NOMBRES  = {0: "person", 9: "traffic light", 11: "stop sign", 15: "cat", 16: "dog"}
-COOLDOWN = 5
+COOLDOWN = 10
 WAKE_KEY = os.getenv("PV_ACCESS_KEY")
 WAKE_PPN = "src/audio/hey_colega.ppn"
 if not WAKE_KEY:
@@ -143,7 +143,29 @@ def main() -> None:
 
             # ------------------------------------------------- SILENCIO
             elif modo == Modo.SILENCIO:
-                pass
+                try:
+                    # sigue escuchando la wake-word
+                    q_wake.get(timeout=1)
+                    texto = stt.transcribe().lower().strip()
+                    print("🔤 (silencio)", texto)
+
+                    # --- órdenes que SÍ rompen el silencio ---
+                    if texto.startswith("despierta") or "espabila" in texto:
+                        modo = Modo.REACTIVO
+                        ultima_frase = responder_libre("He vuelto, colega")
+                        voz.hablar(ultima_frase)
+
+                    elif "modo automático" in texto:
+                        modo = Modo.AUTOMATICO
+                        ultima_frase = responder_libre("Entrando en modo automático")
+                        voz.hablar(ultima_frase)
+
+                    # puedes añadir más comandos que despierten aquí
+                    # todo lo demás se ignora y sigue callado
+
+                except queue.Empty:
+                    # no se oyó wake-word → sigue mudo
+                    pass
 
             # -------- teclas demo rápidas (a, r, s, q) --------
             k = cv2.waitKey(1) & 0xFF

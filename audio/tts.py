@@ -1,5 +1,6 @@
 import threading, pyttsx3
 from typing import Iterable, Mapping
+import textwrap, re
 
 class GestorVoz:
     def __init__(self, velocidad: int = 150, id_voz: int = 0):
@@ -35,3 +36,11 @@ class GestorVoz:
             engine.say(texto)
             engine.runAndWait()
             engine.stop()          
+
+    
+    def hablar_largo(self, texto: str, max_len: int = 120):
+
+        # Reemplaza saltos de línea por espacios
+        limpio = re.sub(r'\s+', ' ', texto).strip()
+        for trozo in textwrap.wrap(limpio, max_len, break_long_words=False):
+            self.hablar(trozo, async_=False)

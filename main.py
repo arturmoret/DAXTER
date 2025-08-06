@@ -36,7 +36,7 @@ def cambiar_modo_por_palabra(texto: str, voz: GestorVoz) -> bool:
     palabra = texto.split(" ", 1)[1].strip()
     mapping = {
         ("reactivo",):                    Modo.REACTIVO,
-        ("automatico", "automático"):     Modo.AUTOMATICO,
+        ("automatico", "automático", "autonomo","autónomo"):     Modo.AUTOMATICO,
         ("silencio", "mute", "callate", "cállate"): Modo.SILENCIO,
         ("sapo", "rana"):                 Modo.SAPO,
     }
@@ -82,6 +82,14 @@ def esperar_encendido():
             if k == b'p': return
             if k == b'q': exit()
 
+def safe_imshow(title: str, img):
+    """Muestra la imagen sin romperse si no hay backend de ventana."""
+    try:
+        cv2.imshow(title, img)
+        cv2.waitKey(1)
+    except cv2.error:
+        pass
+
 # ------------------------------------------------------------------- MAIN
 def main():
     esperar_encendido()
@@ -120,7 +128,7 @@ def main():
                     ultima_frase = describe(objs)
                     voz.hablar(ultima_frase)
 
-                cv2.imshow("Detección", frame_det)
+                safe_imshow("Detección", frame_det)
 
                 # 3· escucha LISTEN_SEC
                 escuchado = False
@@ -176,7 +184,7 @@ def main():
                         frame_det, act = det.detect(frame)
                         ultima_frase = describe([NOMBRES[c] for c in act]) if act else sin_objetos()
                         voz.hablar(ultima_frase)
-                        cv2.imshow("Detección", frame_det); cv2.waitKey(1)
+                        safe_imshow("Detección", frame_det)
 
                     elif texto.startswith(("callate","cállate")):
                         modo = Modo.SILENCIO

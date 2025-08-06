@@ -1,7 +1,7 @@
 # src/main.py
 from __future__ import annotations
 import os, cv2, time, queue, threading, msvcrt, warnings
-
+from vision.capture import flush_camera, save_frame
 from audio.tts       import GestorVoz
 from audio.wake      import WakeWordListener
 from audio.stt       import SpeechRecognizer
@@ -171,16 +171,17 @@ def main():
                         voz.hablar(ultima_frase or responder_libre("No dije nada"))
 
                     elif "saca una foto" in texto or "haz una foto" in texto or "sacó una foto" in texto:
-                        frame = cam.get_frame()
+                        
+                        flush_camera(cam, n=5)             # ← descarta ~5 frames (~200 ms)
+                        frame = cam.get_frame()            # ← ahora sí el último instantáneo
                         if frame is not None:
-                            from vision.capture import save_frame
                             ruta = save_frame(frame)
                             ultima_frase = responder_libre("¡Te he hecho una foto, colega!")
                             voz.hablar(ultima_frase)
                             print(f"📸  Guardada en {ruta}")
                         else:
                             voz.hablar("No pude capturar la imagen, tronco")
-                            
+
                     elif "graba un video" in texto or "graba un vídeo" in texto:
                         from vision.recorder import record_clip
                         ruta = record_clip(cam, seconds=5, fps=30)
@@ -189,6 +190,7 @@ def main():
                         print(f"🎥  Guardado en {ruta}")
 
                     elif any(k in texto for k in ("qué pone", "que pone", "lee el cartel")):
+                        flush_camera(cam, n=5)   
                         frame = cam.get_frame()
                         if frame is not None:
                             from vision.ocr import read_text
@@ -208,6 +210,20 @@ def main():
                         else:
                             voz.hablar("No pude capturar imagen, tronco")
 
+                    elif "de qué color" in texto or "color predominante" in texto or "que color tengo delante" in texto:
+                        flush_camera(cam, n=5)
+                        frame = cam.get_frame()
+                        if frame is not None:
+                            from vision.colors import dominante
+                            color = dominante(frame)
+                            
+                            # 2) nombre del color, sin pasar por LLM
+                            frase_color = f"El color predominante es {color}"
+                            voz.hablar(frase_color, async_=False)
+
+                            ultima_frase = frase_color            # para “repite…”
+                        else:
+                            voz.hablar("No puedo ver el color, tronco")
 
                     else:
                         ultima_frase = responder_libre(texto); voz.hablar(ultima_frase)

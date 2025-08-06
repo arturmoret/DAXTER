@@ -1,6 +1,6 @@
 # src/main.py
 from __future__ import annotations
-import os, cv2, time, queue, threading, msvcrt, warnings
+import os, cv2, time, queue, threading, msvcrt, warnings, random
 from vision.capture import flush_camera, save_frame
 from audio.tts       import GestorVoz
 from audio.wake      import WakeWordListener
@@ -32,23 +32,38 @@ def cambiar_modo_por_palabra(texto: str, voz: GestorVoz) -> bool:
     global modo, ultima_frase
     if not texto.startswith("modo "):
         return False
-    palabra = texto.split(" ", 1)[1].strip()
 
+    palabra = texto.split(" ", 1)[1].strip()
     mapping = {
-        ("reactivo",):                         Modo.REACTIVO,
-        ("automatico", "automático"):          Modo.AUTOMATICO,
+        ("reactivo",):                    Modo.REACTIVO,
+        ("automatico", "automático"):     Modo.AUTOMATICO,
         ("silencio", "mute", "callate", "cállate"): Modo.SILENCIO,
+        ("sapo", "rana"):                 Modo.SAPO,
     }
+
     for aliases, destino in mapping.items():
         if any(palabra.startswith(a) for a in aliases):
             modo = destino
-            tag = {Modo.REACTIVO: "reactivo",
-                   Modo.AUTOMATICO: "automático",
-                   Modo.SILENCIO:  "silencio"}[destino]
+
+            # ---- MODO SAPO: solo croac de bienvenida ----
+            if destino is Modo.SAPO:
+                from audio.sfx import croak
+                croak()
+                ultima_frase = ""
+                return True
+
+            # ---- Otros modos: sigue con TTS normal -------
+            tag = {
+                Modo.REACTIVO:   "reactivo",
+                Modo.AUTOMATICO: "automático",
+                Modo.SILENCIO:   "silencio",
+            }[destino]
+
             ultima_frase = responder_libre(f"Modo {tag} activado")
             voz.hablar(ultima_frase)
             return True
     return False
+
 
 # --------------------------------------------------- hilo Wake-word
 def lanzar_wake_word(q_wake: queue.Queue):
@@ -250,6 +265,29 @@ def main():
                 start(det, cam, voz, stt, NOMBRES)
                 modo = Modo.REACTIVO
                 continue
+
+            # -------------------------------------------------- MODO SAPO
+            elif modo == Modo.SAPO:
+                try:
+                    q_wake.get(timeout=1)
+                    texto = stt.transcribe().lower().strip()
+                    print("🔤 (sapo)", texto)
+
+                    # ¿cambio de modo?
+                    if cambiar_modo_por_palabra(texto, voz):
+                        continue
+
+                    from audio.sfx import croak
+                    if "repite" in texto:
+                        croak(); continue
+
+                    # 1-3 croacs aleatorios
+                    for _ in range(random.randint(1, 2)):
+                        croak()
+
+                except queue.Empty:
+                    pass
+
 
     finally:
         cam.release(); cv2.destroyAllWindows()

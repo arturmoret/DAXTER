@@ -170,7 +170,7 @@ def main():
                     elif "repite" in texto:
                         voz.hablar(ultima_frase or responder_libre("No dije nada"))
 
-                    elif "saca una foto" in texto or "haz una foto" in texto:
+                    elif "saca una foto" in texto or "haz una foto" in texto or "sacó una foto" in texto:
                         frame = cam.get_frame()
                         if frame is not None:
                             from vision.capture import save_frame
@@ -187,6 +187,27 @@ def main():
                         ultima_frase = responder_libre("Vídeo grabado, colega")
                         voz.hablar(ultima_frase)
                         print(f"🎥  Guardado en {ruta}")
+
+                    elif any(k in texto for k in ("qué pone", "que pone", "lee el cartel")):
+                        frame = cam.get_frame()
+                        if frame is not None:
+                            from vision.ocr import read_text
+                            texto_leido = read_text(frame)
+                            print(f"📝 OCR bruto ({len(texto_leido)} chars):\n{texto_leido}\n")
+
+
+                            if texto_leido:
+                                prefacio = responder_libre("Claro, déjame que lo lea alto y claro")
+                                voz.hablar(prefacio, async_=False)          # comentario
+                                voz.hablar_largo(texto_leido)               # ← NUEVO
+                                ultima_frase = texto_leido
+
+                            else:
+                                ultima_frase = responder_libre("No veo texto claro, colega")
+                                voz.hablar(ultima_frase)
+                        else:
+                            voz.hablar("No pude capturar imagen, tronco")
+
 
                     else:
                         ultima_frase = responder_libre(texto); voz.hablar(ultima_frase)

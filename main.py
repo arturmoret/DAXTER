@@ -180,7 +180,14 @@ def main():
                             print(f"📸  Guardada en {ruta}")
                         else:
                             voz.hablar("No pude capturar la imagen, tronco")
- 
+                            
+                    elif "graba un video" in texto or "graba un vídeo" in texto:
+                        from vision.recorder import record_clip
+                        ruta = record_clip(cam, seconds=5, fps=30)
+                        ultima_frase = responder_libre("Vídeo grabado, colega")
+                        voz.hablar(ultima_frase)
+                        print(f"🎥  Guardado en {ruta}")
+
                     else:
                         ultima_frase = responder_libre(texto); voz.hablar(ultima_frase)
                 except queue.Empty:

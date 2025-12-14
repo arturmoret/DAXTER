@@ -1,42 +1,42 @@
-# DAXTER – Gafas parlantes con visión, juego y voz clonada
+# DAXTER – Talking Smart Glasses with Vision, Game, and Cloned Voice
 
-> Un asistente **hands‑free** que ve, escucha y contesta con personalidad.
-> Modos de escucha, descripción automática, OCR, color predominante, capturas,
-> clips de vídeo, **minijuego “veo‑veo”** y conmutación de **voz local** ↔ **voz clonada (ElevenLabs)** en vivo.
-> Listo para PC y preparado para **Raspberry Pi 4**.
-
----
-
-## Características
-
-* **Wake word** (“Hey colega”) con Picovoice Porcupine.
-* **Modos**:
-* **Reactivo**: espera y responde a órdenes.
-* **Automático**: mira y describe cada *N* segundos, con ventana corta para órdenes.
-* **Silencio**: no habla (pero sigue escuchando “despierta” o “modo X”).
-* **Sapo**: solo hace *croac* (¡porque sí !).
-* **Juego**: “**veo‑veo**” con la cámara (acierta o ríndete).
-* **Visión**:
-* Detección de objetos con **YOLOv5**.
-* **OCR** con EasyOCR (“qué pone”).
-* **Color predominante** (“de qué color es”).
-* **Capturas**:
-* **Fotos** a disco.
-* **Vídeos** cortos (5 s) a disco.
-* **Voz**:
-* **Local** (pyttsx3, offline).
-* **Clonada** (ElevenLabs, online). Cambia en tiempo real: “voz real/voz Daxter” ↔ “voz robot”.
-* **Anti‑eco** y **frescura de frame**: evita que el TTS contamine el STT y descarta frames viejos (no verás “fotos del pasado”).
+> A **hands‑free** assistant that sees, listens, and answers with personality.
+> Listening modes, automatic description, OCR, dominant color, screenshots,
+> video clips, an **“I Spy” mini‑game**, and live switching between **local voice** ↔ **cloned voice (ElevenLabs)**.
+> Ready for PC and prepared for **Raspberry Pi 4**.
 
 ---
 
-## Arquitectura (alto nivel)
+## Features
+
+* **Wake word** (“Hey colega”) with Picovoice Porcupine.
+* **Modes**:
+  * **Reactive**: waits and responds to commands.
+  * **Automatic**: looks and describes every *N* seconds, with a short window for commands.
+  * **Silent**: does not speak (but still listens for “wake up” or “mode X”).
+  * **Frog**: only goes *croak* (just because!).
+  * **Game**: “**I Spy**” using the camera (guess it or give up).
+* **Vision**:
+  * Object detection with **YOLOv5**.
+  * **OCR** with EasyOCR (“what does it say?”).
+  * **Dominant color** (“what color is it?”).
+* **Captures**:
+  * **Photos** saved to disk.
+  * Short **videos** (5 s) saved to disk.
+* **Voice**:
+  * **Local** (pyttsx3, offline).
+  * **Cloned** (ElevenLabs, online). Switches in real time: “real voice/Daxter voice” ↔ “robot voice”.
+* **Anti‑echo** and **frame freshness**: prevents TTS from contaminating STT and drops stale frames (no “photos from the past”).
+
+---
+
+## Architecture (high level)
 
 ```
 src/
-├─ main.py # bucle principal + modos
+├─ main.py # main loop + modes
 ├─ ai/
-│ └─ llm.py # frases y estilo (Daxter)
+│ └─ llm.py # phrases and style (Daxter)
 ├─ audio/
 │ ├─ stt.py # SpeechRecognizer (STT)
 │ ├─ tts_factory.py # get_tts()/switch_tts()
@@ -44,46 +44,46 @@ src/
 │ ├─ tts_eleven.py # TTS ElevenLabs (online)
 │ ├─ wake.py # WakeWordListener (Porcupine)
 │ └─ sfx/
-│ ├─ frog/ # sonidos del modo SAPO
+│ ├─ frog/ # sounds for FROG mode
 │ └─ __init__.py
 ├─ control/
-│ └─ mode_manager.py # Enum Modo {REACTIVO, ...}
+│ └─ mode_manager.py # Mode Enum {REACTIVE, ...}
 ├─ games/
-│ └─ veo_veo.py # minijuego “veo‑veo”
+│ └─ i_spy.py # “I Spy” mini‑game
 ├─ vision/
-│ ├─ camera.py # wrapper de cámara
+│ ├─ camera.py # camera wrapper
 │ ├─ detector.py # YOLOv5
 │ ├─ ocr.py # EasyOCR
-│ ├─ colors.py # color predominante
+│ ├─ colors.py # dominant color
 │ ├─ capture.py # flush_camera(), save_frame()
-│ └─ recorder.py # grabación de vídeo (5s)
+│ └─ recorder.py # video recording (5s)
 └─ captures/
- ├─ images/ # fotos guardadas
- └─ videos/ # clips guardados
+ ├─ images/ # saved photos
+ └─ videos/ # saved clips
 ```
 
 ---
 
-## Requisitos
+## Requirements
 
-* **Python 3.10–3.11** (recomendado).
-* **Windows / Linux / macOS** o **Raspberry Pi 4 (4GB+)**.
-* **Micrófono** + **cámara**.
-* **ffmpeg/mpv** (opcional para reproducir audio streamed de ElevenLabs).
-* GPU (opcional) → acelera YOLOv5 y OCR.
+* **Python 3.10–3.11** (recommended).
+* **Windows / Linux / macOS** or **Raspberry Pi 4 (4GB+)**.
+* **Microphone** + **camera**.
+* **ffmpeg/mpv** (optional to play streamed audio from ElevenLabs).
+* GPU (optional) → speeds up YOLOv5 and OCR.
 
 ---
 
-## Instalación
+## Installation
 
-1. **Clona** y entra:
+1. **Clone** and enter:
 
 ```bash
-git clone https://github.com/tu-usuario/daxter-glasses.git
+git clone https://github.com/your-user/daxter-glasses.git
 cd daxter-glasses
 ```
 
-2. **Entorno**:
+2. **Virtual environment**:
 
 ```bash
 python -m venv .venv
@@ -93,117 +93,117 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-3. **Dependencias**:
+3. **Dependencies**:
 
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-4. **Modelos / binarios**
+4. **Models / binaries**
 
-* YOLOv5 se descarga la primera vez (torch hub).
-* EasyOCR descargará sus pesos al primer uso.
-* Para reproducir streaming ElevenLabs: instala **mpv** o **ffmpeg** (opcional).
+* YOLOv5 downloads the first time (torch hub).
+* EasyOCR downloads its weights on first use.
+* For ElevenLabs streaming playback: install **mpv** or **ffmpeg** (optional).
 
 ---
 
-## Variables de entorno
+## Environment variables
 
-Crea un fichero `.env` en la raíz (o define variables del sistema):
+Create a `.env` file at the project root (or set system env vars):
 
 ```ini
 # Wake word (Picovoice Porcupine)
 PV_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-# ElevenLabs (opcional, solo si vas a usar la voz clonada)
+# ElevenLabs (optional, only if you will use the cloned voice)
 ELEVENLABS_API_KEY=elevenlabssssssssssssssssss
 ELEVENLABS_VOICE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
 
-# Idioma por defecto (opcional)
+# Default language (optional)
 LANG=es_ES
 ```
 
-> El archivo **wake word** se espera en `src/audio/hey_colega.ppn`.
+> The **wake word** file is expected at `src/audio/hey_colega.ppn`.
 
 ---
 
-## Ejecución
+## Run
 
 ```bash
 python src/main.py
 ```
 
-* En consola verás: **“Pulsa P para encender (Q para salir)”**.
-* Pulsa **P** para iniciar; **Q** cierra el proceso.
+* In the console you will see: **“Press P to power on (Q to quit)”**.
+* Press **P** to start; **Q** exits the process.
 
 ---
 
-## Guía de comandos (cheat‑sheet)
+## Command guide (cheat‑sheet)
 
-> Siempre empieza con la wake word (botón + “Hey colega…”) —internamente `WakeWordListener` mete un evento en la cola y el STT toma la frase.
+> Always start with the wake word (button + “Hey colega…”) — internally `WakeWordListener` pushes an event into a queue and STT captures the phrase.
 
-### Cambiar de **modo**
+### Switch **mode**
 
-* “**modo reactivo**”
-* “**modo automático**” / “**modo autónomo**”
-* “**modo silencio**”
-* “**modo sapo**”
+* “**reactive mode**”
+* “**automatic mode**” / “**autonomous mode**”
+* “**silent mode**”
+* “**frog mode**”
 
-### Despertar desde silencio
+### Wake up from silence
 
-* “**despierta**” / “**espabila**”
+* “**wake up**” / “**snap out of it**”
 
-### **Voz**
+### **Voice**
 
-* Activar clonada: “**voz real**” / “**voz Daxter**” / “**habla bien**”
-* Volver a local: “**voz robot**” / “**voz normal**” / “**habla robot**”
+* Enable cloned: “**real voice**” / “**Daxter voice**” / “**speak properly**”
+* Back to local: “**robot voice**” / “**normal voice**” / “**speak robot**”
 
-### **Visión / cámara**
+### **Vision / camera**
 
-* “**qué tengo delante**” → YOLOv5
-* “**saca una foto** / **haz una foto**” → guarda en `src/captures/images/`
-* “**graba un vídeo**” → clip 5s en `src/captures/videos/`
-* “**qué pone** / **lee el cartel**” → OCR + lectura
-* “**de qué color** / **color predominante**” → color dominante del frame
+* “**what’s in front of me**” → YOLOv5
+* “**take a photo**” → saves to `src/captures/images/`
+* “**record a video**” → 5s clip to `src/captures/videos/`
+* “**what does it say**” / “**read the sign**” → OCR + read aloud
+* “**what color is it**” / “**dominant color**” → dominant color of the current frame
 
-### **Juego**
+### **Game**
 
-* “**veo veo**” → entra en modo **JUEGO**:
-* Daxter: “¡Veo veo algo que empieza por la letra X! ¿Qué es?”
-* Puedes responder (acierto), fallar (reintentos) o rendirte (“**me rindo / no lo sé / ni idea**”).
-* Daxter termina anunciando la solución y vuelve a **reactivo**.
+* “**I spy**” → enters **GAME** mode:
+  * Daxter: “I spy something that starts with the letter X! What is it?”
+  * You can answer (correct), miss (retries), or give up (“**I give up / I don’t know / no idea**”).
+  * Daxter ends by announcing the solution and returns to **reactive**.
 
-### **Otros**
+### **Other**
 
-* “**repite**” → lee la última frase (en SAPO: vuelve a croar).
+* “**repeat**” → reads the last phrase again (in FROG mode: croaks again).
 
 ---
 
-## Detalles de implementación que importan
+## Implementation details that matter
 
-### Frescura de frame
+### Frame freshness
 
-* Antes de sacar foto/OCR/color, se hace `flush_camera(n=5)` y **luego** se lee el frame actual. Evita “frames del pasado” cuando la cámara lleva buffer.
+* Before taking a photo / OCR / dominant color, the system calls `flush_camera(n=5)` and **then** reads the current frame. This avoids “frames from the past” when the camera has buffered frames.
 
-### Anti‑eco TTS→STT
+### Anti‑echo TTS→STT
 
-* Pausas cortas y llamadas **sincrónicas** (p.ej. `async_=False`) en frases clave para no crear *feedback loops* entre voz y escucha.
+* Short pauses and **synchronous** calls (e.g., `async_=False`) for key phrases to avoid *feedback loops* between speaking and listening.
 
 ### `safe_imshow`
 
-* En entornos sin backend de ventana (WSL/SSH), `cv2.imshow` puede fallar. Se usa un wrapper que atrapa el error y no rompe la ejecución.
+* In environments without a window backend (WSL/SSH), `cv2.imshow` can fail. A wrapper catches the error so execution continues.
 
-### Conmutación de voz en vivo
+### Live voice switching
 
-* `audio/tts_factory.py` expone:
-* `get_tts()` → instancia actual (local o ElevenLabs).
-* `switch_tts("local"|"eleven")` → conmuta.
-* Los **comandos de voz** llaman a `switch_tts` sin reiniciar el proceso.
+* `audio/tts_factory.py` exposes:
+  * `get_tts()` → current instance (local or ElevenLabs).
+  * `switch_tts("local"|"eleven")` → switches.
+* **Voice commands** call `switch_tts` without restarting the process.
 
 ---
 
-## Carpetas de salida
+## Output folders
 
 ```
 src/captures/
@@ -215,29 +215,29 @@ src/captures/
 
 ---
 
-## Flujo típico
+## Typical flow
 
-1. Enciendes (P).
-2. “Hey colega, **qué tengo delante**” → describe detecciones.
-3. “Hey colega, **voz real**” → activa ElevenLabs.
-4. “Hey colega, **qué pone**” → OCR, lee en alto.
-5. “Hey colega, **veo veo**” → juega un rato.
-6. “Hey colega, **saca una foto**” → imagen a disco.
-7. “Hey colega, **modo automático**” → describe cada *COOLDOWN* s.
-8. “Hey colega, **modo silencio**” → calla. “**despierta**” para volver.
+1. Power on (P).
+2. “Hey colega, **what’s in front of me**” → describes detections.
+3. “Hey colega, **real voice**” → enables ElevenLabs.
+4. “Hey colega, **what does it say**” → OCR, reads aloud.
+5. “Hey colega, **I spy**” → play for a bit.
+6. “Hey colega, **take a photo**” → image saved to disk.
+7. “Hey colega, **automatic mode**” → describes every *COOLDOWN* s.
+8. “Hey colega, **silent mode**” → quiet. Say “**wake up**” to return.
 
 ---
 
-## Raspberry Pi 4 (preparado)
+## Raspberry Pi 4 (ready)
 
-> Probado/optimizado para **Raspberry Pi 4 Model B (4GB)**. Requisitos y notas:
+> Tested/optimized for **Raspberry Pi 4 Model B (4GB)**. Requirements and notes:
 
-* **SO:** Raspberry Pi OS (Bookworm), 64‑bit recomendado.
-* **Python:** 3.11 recomendado (usa `pyenv` o la versión del sistema).
-* **Cámara:** CSI (libcamera) o USB UVC.
-* **Audio:** micro USB o HAT; altavoz o jack/HDMI.
+* **OS:** Raspberry Pi OS (Bookworm), 64‑bit recommended.
+* **Python:** 3.11 recommended (use `pyenv` or the system version).
+* **Camera:** CSI (libcamera) or USB UVC.
+* **Audio:** USB mic or HAT; speaker or jack/HDMI.
 
-### Paquetes del sistema
+### System packages
 
 ```bash
 sudo apt update
@@ -247,93 +247,93 @@ sudo apt install -y python3-venv python3-dev build-essential \
  libswscale-dev libgtk-3-dev portaudio19-dev ffmpeg
 ```
 
-### Entorno + deps
+### Environment + deps
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip wheel setuptools
-pip install -r requirements_rpi.txt # (lista afinada para ARMv7/ARM64)
+pip install -r requirements_rpi.txt # (tuned list for ARMv7/ARM64)
 ```
 
-### Consejos de rendimiento en Pi
+### Performance tips on Pi
 
-* Usa **YOLOv5n** o reduce resolución de entrada en `vision/detector.py`.
-* Sube `COOLDOWN` (p.ej. 15–20 s) para modo automático.
-* EasyOCR va en CPU: **limitar OCR** a petición (“qué pone”).
-* Considera activar **GPU Vulkan** si usas librerías compatibles, o cambiar a modelos **tflite/ncnn** si lo necesitas (futuro roadmap).
+* Use **YOLOv5n** or reduce input resolution in `vision/detector.py`.
+* Increase `COOLDOWN` (e.g., 15–20 s) for automatic mode.
+* EasyOCR runs on CPU: **limit OCR** to on-demand (“what does it say?”).
+* Consider enabling **Vulkan GPU** if you use compatible libraries, or switch to **tflite/ncnn** models if needed (future roadmap).
 
 ---
 
-## Solución de problemas
+## Troubleshooting
 
 **OpenCV “The function is not implemented (cvShowImage/cvDestroyAllWindows)”**
-→ No hay backend GUI. Usa `safe_imshow` (ya en el código) o instala `libgtk-3-dev` (Linux) / usa `imshow` solo si hay escritorio. En Windows, evita `destroyAllWindows()` si no has abierto ventanas.
+→ No GUI backend is available. Use `safe_imshow` (already in the code), or install `libgtk-3-dev` (Linux) / only use `imshow` if a desktop environment is present. On Windows, avoid `destroyAllWindows()` if you never opened windows.
 
 **Pandas/Numpy “dtype size changed”**
-→ Incompatibilidad binaria. Haz:
+→ Binary incompatibility. Run:
 
 ```bash
 pip install --upgrade --force-reinstall numpy pandas
 ```
 
-**ElevenLabs 401 “needs\_authorization”**
-→ Falta `ELEVENLABS_API_KEY` en entorno. Crea `.env` o exporta la variable.
+**ElevenLabs 401 “needs_authorization”**
+→ Missing `ELEVENLABS_API_KEY` in the environment. Create `.env` or export the variable.
 
-**No reproduce voz ElevenLabs**
-→ Instala `mpv` o `ffmpeg`, o usa el método que guarda WAV a disco y lo reproduce con `playsound`.
+**No ElevenLabs voice playback**
+→ Install `mpv` or `ffmpeg`, or use the method that saves WAV to disk and plays it with `playsound`.
 
-**Foto “del pasado”**
-→ Asegúrate de que el comando usa `flush_camera(...)` (ya está en el main).
+**“Photo from the past”**
+→ Make sure the command uses `flush_camera(...)` (it already does in `main`).
 
-**Wake word no salta**
-→ Revisa `PV_ACCESS_KEY` y la ruta del `.ppn`. Baja ruido de fondo.
-
----
-
-## Roadmap (ideas próximas)
-
-* **Whisper** local (tiny/base) para STT offline.
-* **Seguimiento de objetos** y narración “tipo guía”.
-* **AR overlays** (bounding boxes y etiquetas on‑device).
-* **Modo Sabio**: respuestas estilo “mentor zen”.
-* **Navegación indoor simplificada** (balizas BLE).
-* **Entrenamiento de voces** adicionales.
+**Wake word doesn’t trigger**
+→ Check `PV_ACCESS_KEY` and the `.ppn` path. Reduce background noise.
 
 ---
 
-## Contribuir
+## Roadmap (next ideas)
 
-1. Haz un fork y crea rama: `feat/mi-idea`.
-2. Pasa `ruff`/`black` (si te apetece).
-3. PR con descripción clara + pasos de prueba.
-
----
-
-## Licencia
-
-Elige la que prefieras (MIT recomendado).
-Incluye notas de uso responsable para **grabación de imágenes/voz** y **OCR de contenido sensible**.
+* Local **Whisper** (tiny/base) for offline STT.
+* **Object tracking** and “tour guide” narration.
+* **AR overlays** (bounding boxes and labels on-device).
+* **Wise mode**: “zen mentor” style answers.
+* Simplified **indoor navigation** (BLE beacons).
+* Additional **voice training**.
 
 ---
 
-## Créditos
+## Contributing
+
+1. Fork and create a branch: `feat/my-idea`.
+2. Run `ruff`/`black` (if you feel like it).
+3. Open a PR with a clear description + test steps.
+
+---
+
+## License
+
+Pick the one you prefer (MIT recommended).
+Include responsible use notes for **image/voice recording** and **OCR of sensitive content**.
+
+---
+
+## Credits
 
 * **YOLOv5** – Ultralytics.
 * **EasyOCR** – Jaided AI.
 * **Porcupine** (wake word) – Picovoice.
-* **ElevenLabs** (voz clonada).
-* Comunidad open‑source .
+* **ElevenLabs** (cloned voice).
+* Open-source community.
 
 ---
 
-## Apéndice: variables y rutas clave
+## Appendix: key variables and paths
 
-* `PV_ACCESS_KEY` – clave Porcupine.
-* `ELEVENLABS_API_KEY` + `ELEVENLABS_VOICE_ID` – voz clonada.
+* `PV_ACCESS_KEY` – Porcupine key.
+* `ELEVENLABS_API_KEY` + `ELEVENLABS_VOICE_ID` – cloned voice.
 * `src/audio/hey_colega.ppn` – wake word.
-* Capturas: `src/captures/images/` y `src/captures/videos/`.
+* Captures: `src/captures/images/` and `src/captures/videos/`.
 
 ---
 
-Si llegaste hasta aquí: **gracias**. Ponte las gafas, di **“Hey colega”**… y deja que Daxter haga el resto .
+If you made it this far: **thank you**. Put on the glasses, say **“Hey colega”**… and let Daxter do the rest.
